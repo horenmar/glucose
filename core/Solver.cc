@@ -350,7 +350,7 @@ inline unsigned int Solver::computeLBD(const vec<Lit> & lits,int end) {
     if(end==-1) end = lits.size();
     unsigned int nbDone = 0;
     for(int i=0;i<lits.size();i++) {
-      if(nbDone>=end) break;
+      if(int(nbDone) >= end) break;
       if(isSelector(var(lits[i]))) continue;
       nbDone++;
       int l = level(var(lits[i]));
@@ -379,7 +379,7 @@ inline unsigned int Solver::computeLBD(const Clause &c) {
   if(incremental) { // ----------------- INCREMENTAL MODE
      int nbDone = 0;
     for(int i=0;i<c.size();i++) {
-      if(nbDone>=c.sizeWithoutSelectors()) break;
+      if(nbDone >= int(c.sizeWithoutSelectors())) break;
       if(isSelector(var(c[i]))) continue;
       nbDone++;
       int l = level(var(c[i]));
@@ -1027,7 +1027,7 @@ bool Solver::simplify()
 |    all variables are decision variables, this means that the clause set is satisfiable. 'l_False'
 |    if the clause set is unsatisfiable. 'l_Undef' if the bound on number of conflicts is reached.
 |________________________________________________________________________________________________@*/
-lbool Solver::search(int nof_conflicts)
+lbool Solver::search(int)
 {
     assert(ok);
     int         backtrack_level;
@@ -1117,14 +1117,12 @@ lbool Solver::search(int nof_conflicts)
 	    return l_False;
 	  }
 	    // Perform clause database reduction !
-	    if(conflicts>=curRestart* nbclausesbeforereduce) 
-	      {
-	
-		assert(learnts.size()>0);
-		curRestart = (conflicts/ nbclausesbeforereduce)+1;
-		reduceDB();
-		nbclausesbeforereduce += incReduceDB;
-	      }
+	    if(int(conflicts) >= curRestart * nbclausesbeforereduce)  {
+		    assert(learnts.size()>0);
+		    curRestart = (conflicts/ nbclausesbeforereduce)+1;
+		    reduceDB();
+		    nbclausesbeforereduce += incReduceDB;
+        }
 	    
             Lit next = lit_Undef;
             while (decisionLevel() < assumptions.size()){
@@ -1179,16 +1177,16 @@ double Solver::progressEstimate() const
 void Solver::printIncrementalStats() {
 
   printf("c---------- Glucose Stats -------------------------\n");
-  printf("c restarts              : %lld\n", starts);
-  printf("c nb ReduceDB           : %lld\n", nbReduceDB);
-  printf("c nb removed Clauses    : %lld\n",nbRemovedClauses);
-  printf("c nb learnts DL2        : %lld\n", nbDL2);
-  printf("c nb learnts size 2     : %lld\n", nbBin);
-  printf("c nb learnts size 1     : %lld\n", nbUn);
+  printf("c restarts              : %" PRIu64 "\n", starts);
+  printf("c nb ReduceDB           : %" PRIu64 "\n", nbReduceDB);
+  printf("c nb removed Clauses    : %" PRIu64 "\n", nbRemovedClauses);
+  printf("c nb learnts DL2        : %" PRIu64 "\n", nbDL2);
+  printf("c nb learnts size 2     : %" PRIu64 "\n", nbBin);
+  printf("c nb learnts size 1     : %" PRIu64 "\n", nbUn);
 
-  printf("c conflicts             : %lld \n",conflicts);
-  printf("c decisions             : %lld\n",decisions);
-  printf("c propagations          : %lld\n",propagations);
+  printf("c conflicts             : %" PRIu64 "\n", conflicts);
+  printf("c decisions             : %" PRIu64 "\n", decisions);
+  printf("c propagations          : %" PRIu64 "\n", propagations);
 
   printf("c SAT Calls             : %d in %g seconds\n",nbSatCalls,totalTime4Sat);
   printf("c UNSAT Calls           : %d in %g seconds\n",nbUnsatCalls,totalTime4Unsat);
@@ -1318,7 +1316,7 @@ void Solver::toDimacs(const char *file, const vec<Lit>& assumps)
 }
 
 
-void Solver::toDimacs(FILE* f, const vec<Lit>& assumps)
+void Solver::toDimacs(FILE* f, const vec<Lit>&)
 {
     // Handle case when solver is in contradictory state:
     if (!ok){
