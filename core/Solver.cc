@@ -887,38 +887,39 @@ CRef Solver::propagate()
     return confl;
 }
 
+namespace {
+    /*_________________________________________________________________________________________________
+    |
+    |  reduceDB : ()  ->  [void]
+    |
+    |  Description:
+    |    Remove half of the learnt clauses, minus the clauses locked by the current assignment. Locked
+    |    clauses are clauses that are reason to some assignment. Binary clauses are never removed.
+    |________________________________________________________________________________________________@*/
+    struct reduceDB_lt {
+        ClauseAllocator& ca;
+        reduceDB_lt(ClauseAllocator& ca_): ca(ca_) {}
+        bool operator () (CRef x, CRef y) {
 
-/*_________________________________________________________________________________________________
-|
-|  reduceDB : ()  ->  [void]
-|  
-|  Description:
-|    Remove half of the learnt clauses, minus the clauses locked by the current assignment. Locked
-|    clauses are clauses that are reason to some assignment. Binary clauses are never removed.
-|________________________________________________________________________________________________@*/
-struct reduceDB_lt { 
-    ClauseAllocator& ca;
-    reduceDB_lt(ClauseAllocator& ca_) : ca(ca_) {}
-    bool operator () (CRef x, CRef y) { 
- 
-    // Main criteria... Like in MiniSat we keep all binary clauses
-    if(ca[x].size()> 2 && ca[y].size()==2) return 1;
-    
-    if(ca[y].size()>2 && ca[x].size()==2) return 0;
-    if(ca[x].size()==2 && ca[y].size()==2) return 0;
-    
-    // Second one  based on literal block distance
-    if(ca[x].lbd()> ca[y].lbd()) return 1;
-    if(ca[x].lbd()< ca[y].lbd()) return 0;    
-    
-    
-    // Finally we can use old activity or size, we choose the last one
-        return ca[x].activity() < ca[y].activity();
-	//return x->size() < y->size();
+            // Main criteria... Like in MiniSat we keep all binary clauses
+            if (ca[x].size() > 2 && ca[y].size() == 2) return 1;
 
-        //return ca[x].size() > 2 && (ca[y].size() == 2 || ca[x].activity() < ca[y].activity()); } 
-    }    
-};
+            if (ca[y].size() > 2 && ca[x].size() == 2) return 0;
+            if (ca[x].size() == 2 && ca[y].size() == 2) return 0;
+
+            // Second one  based on literal block distance
+            if (ca[x].lbd() > ca[y].lbd()) return 1;
+            if (ca[x].lbd() < ca[y].lbd()) return 0;
+
+
+            // Finally we can use old activity or size, we choose the last one
+            return ca[x].activity() < ca[y].activity();
+            //return x->size() < y->size();
+
+                //return ca[x].size() > 2 && (ca[y].size() == 2 || ca[x].activity() < ca[y].activity()); } 
+        }
+    };
+}
 
 void Solver::reduceDB()
 {
