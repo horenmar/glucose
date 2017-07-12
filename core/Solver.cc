@@ -1147,7 +1147,6 @@ lbool Solver::search(int)
                 next = pickBranchLit();
 
                 if (next == lit_Undef){
-		  printf("c last restart ## conflicts  :  %d %d \n",conflictC,decisionLevel());
 		  // Model found:
 		  return l_True;
 		}
